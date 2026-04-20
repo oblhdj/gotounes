@@ -1,0 +1,3 @@
+const String supabaseUrl = 'https://tjehrtkkmumocrwupcfq.supabase.co';
+const String supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqZWhydGtrbXVtb2Nyd3VwY2ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMzc3NTksImV4cCI6MjA5MTkxMzc1OX0._HHINrdpsznhsRcDpj6eEta88iHsuWCteXa9eqn2XYI';
+const bool devAuthBypass = false;
