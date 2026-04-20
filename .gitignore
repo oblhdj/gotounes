@@ -47,3 +47,4 @@ app.*.map.json
 # Environment / secrets
 .env
 lib/config/app_config.dart
+.vscode/
