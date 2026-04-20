@@ -205,6 +205,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     return DestinationCard(
                       destination: d,
                       compact: true,
+                      heroTagPrefix: 'explore_',
                       onFavoriteToggle: () => widget.onFavoriteToggle(d.id),
                     );
                   },

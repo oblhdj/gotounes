@@ -15,10 +15,12 @@ class DestinationDetailScreen extends StatefulWidget {
     super.key,
     required this.destination,
     required this.onFavoriteToggle,
+    this.heroTag,
   });
 
   final Destination destination;
   final VoidCallback onFavoriteToggle;
+  final String? heroTag;
 
   @override
   State<DestinationDetailScreen> createState() =>
@@ -142,7 +144,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final heroTag = 'destination_${_destination.id}';
+    final heroTag = widget.heroTag ?? 'destination_${_destination.id}';
 
     return Scaffold(
       body: CustomScrollView(

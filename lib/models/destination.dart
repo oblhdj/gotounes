@@ -14,18 +14,10 @@ class Destination {
     this.avgPriceTnd = '',
     this.lat,
     this.lng,
-    // Add to constructor params:
     this.safetyNote = '',
+  });
 
-    // Add field:
-    final String safetyNote;
-
-    // Add to copyWith:
-    String? safetyNote,
-    // and in return:
-    safetyNote: safetyNote ?? this.safetyNote,
-    });
-
+  final String safetyNote;
   final String id;
   final String name;
   final String region;
@@ -56,6 +48,7 @@ class Destination {
     String? avgPriceTnd,
     double? lat,
     double? lng,
+    String? safetyNote,
   }) {
     return Destination(
       id: id ?? this.id,
@@ -72,6 +65,7 @@ class Destination {
       avgPriceTnd: avgPriceTnd ?? this.avgPriceTnd,
       lat: lat ?? this.lat,
       lng: lng ?? this.lng,
+      safetyNote: safetyNote ?? this.safetyNote,
     );
   }
 }

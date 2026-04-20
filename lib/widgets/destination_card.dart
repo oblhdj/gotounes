@@ -12,11 +12,13 @@ class DestinationCard extends StatelessWidget {
     required this.destination,
     required this.onFavoriteToggle,
     this.compact = false,
+    this.heroTagPrefix = '',
   });
 
   final Destination destination;
   final VoidCallback onFavoriteToggle;
   final bool compact;
+  final String heroTagPrefix;
 
   bool _isSafeUrl(String url) {
     final uri = Uri.tryParse(url);
@@ -27,7 +29,7 @@ class DestinationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final radius = BorderRadius.circular(16);
-    final heroTag = 'destination_${destination.id}';
+    final heroTag = '${heroTagPrefix}destination_${destination.id}';
 
     if (compact) {
       return Card(
@@ -43,6 +45,7 @@ class DestinationCard extends StatelessWidget {
                 builder: (_) => DestinationDetailScreen(
                   destination: destination,
                   onFavoriteToggle: onFavoriteToggle,
+                  heroTag: heroTag,
                 ),
               ),
             );
@@ -187,6 +190,7 @@ class DestinationCard extends StatelessWidget {
               builder: (_) => DestinationDetailScreen(
                 destination: destination,
                 onFavoriteToggle: onFavoriteToggle,
+                heroTag: heroTag,
               ),
             ),
           );

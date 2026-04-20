@@ -189,6 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   final d = _filtered[i];
                   return DestinationCard(
                     destination: d,
+                    heroTagPrefix: 'home_',
                     onFavoriteToggle: () => widget.onFavoriteToggle(d.id),
                   );
                 },

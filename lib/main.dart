@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/app_colors.dart';
@@ -53,6 +54,7 @@ class GoTounesApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final base = ThemeData(
       useMaterial3: true,
+      textTheme: GoogleFonts.notoSansTextTheme(),
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         brightness: Brightness.light,

@@ -50,6 +50,7 @@ class FavoritesScreen extends StatelessWidget {
                 final d = favorites[i];
                 return DestinationCard(
                   destination: d,
+                  heroTagPrefix: 'fav_',
                   onFavoriteToggle: () => onFavoriteToggle(d.id),
                 );
               },
