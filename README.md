@@ -1,17 +1,20 @@
-# gotounes
+# GoTounes 🇹🇳
+Discover Tunisia. Safely. Reliably.
 
-A new Flutter project.
+A mobile-first travel discovery app for Tunisia — verified places, 
+real prices in TND, and honest safety ratings.
 
-## Getting Started
+## Stack
+Flutter · Supabase · Dart
 
-This project is a starting point for a Flutter application.
+## Features
+- Browse and filter verified destinations across Tunisia
+- Safety scores and honest pricing in TND
+- Favorites system with Supabase sync
+- User reviews with likes
+- Submit new places for review
+- Google Sign-In + email auth
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Setup
+Copy `lib/config/app_config.dart.example` to `lib/config/app_config.dart` 
+and fill in your Supabase credentials.
