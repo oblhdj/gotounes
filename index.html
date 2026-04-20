@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GoTounes — Discover Tunisia. Safely. Reliably.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,700;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream: #F5EFE2;
+  --cream-dark: #EDE5D2;
+  --teal-deep: #1A4A3E;
+  --teal: #2A6B5A;
+  --teal-mid: #3D8B76;
+  --teal-light: #A8D4C8;
+  --teal-xlight: #D4EAE4;
+  --sand: #C9A96E;
+  --sand-light: #E8D9BC;
+  --brown: #7A4F2A;
+  --text: #1A2E28;
+  --text-soft: #4A6B5E;
+  --text-muted: #7A9E94;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* ─── NAV ─── */
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 2.5rem;
+  background: var(--cream);
+  border-bottom: 1px solid rgba(42,107,90,0.12);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+}
+
+.logo-icon {
+  width: 38px;
+  height: 38px;
+}
+
+.logo-wordmark {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--teal-deep);
+  letter-spacing: -0.5px;
+}
+
+.logo-wordmark em {
+  font-style: italic;
+  color: var(--teal-mid);
+}
+
+.nav-cta {
+  padding: 9px 20px;
+  background: var(--teal-deep);
+  color: var(--cream);
+  border: none;
+  border-radius: 99px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.nav-cta:hover { background: var(--teal); }
+
+/* ─── HERO ─── */
+.hero {
+  min-height: 92vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 2rem;
+  padding: 4rem 2.5rem 3rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.hero-left { max-width: 520px; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--teal-xlight);
+  color: var(--teal-deep);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 14px;
+  border-radius: 99px;
+  border: 1px solid rgba(42,107,90,0.2);
+  margin-bottom: 1.75rem;
+  letter-spacing: 0.3px;
+}
+
+.pill-dot {
+  width: 6px; height: 6px;
+  background: var(--teal-mid);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.5; transform:scale(0.7); }
+}
+
+h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2.6rem, 4.5vw, 3.8rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--teal-deep);
+  letter-spacing: -1px;
+  margin-bottom: 1.25rem;
+}
+
+h1 .accent {
+  font-style: italic;
+  color: var(--teal-mid);
+}
+
+.sub {
+  font-size: 17px;
+  color: var(--text-soft);
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+  max-width: 400px;
+}
+
+/* waitlist form */
+.form-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 420px;
+}
+
+.input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.input-row input[type="email"] {
+  flex: 1;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(42,107,90,0.25);
+  background: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-row input[type="email"]:focus {
+  border-color: var(--teal-mid);
+  box-shadow: 0 0 0 4px rgba(61,139,118,0.1);
+}
+
+.input-row input::placeholder { color: var(--teal-light); }
+
+.btn-join {
+  padding: 14px 26px;
+  background: var(--teal-deep);
+  color: var(--cream);
+  border: none;
+  border-radius: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn-join:hover { background: var(--teal); }
+.btn-join:active { transform: scale(0.98); }
+
+.form-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.form-success {
+  display: none;
+  background: var(--teal-xlight);
+  border: 1px solid rgba(42,107,90,0.25);
+  border-radius: 14px;
+  padding: 14px 18px;
+  color: var(--teal-deep);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ─── HERO RIGHT — Tunisia map illustration ─── */
+.hero-right {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.map-bg-circle {
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: var(--sand-light);
+  position: absolute;
+  opacity: 0.4;
+}
+
+.map-svg {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 8px 32px rgba(42,107,90,0.15));
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* ─── FEATURES STRIP ─── */
+.features {
+  background: var(--teal-deep);
+  padding: 3.5rem 2.5rem;
+}
+
+.features-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.feat {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.feat-title {
+  font-family: 'Fraunces', serif;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--cream);
+}
+
+.feat-desc {
+  font-size: 13px;
+  color: var(--teal-light);
+  line-height: 1.6;
+}
+
+/* ─── STATS ─── */
+.stats {
+  padding: 4rem 2.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  gap: 0;
+  background: white;
+  border-radius: 24px;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  overflow: hidden;
+  border: 1px solid rgba(42,107,90,0.12);
+  box-shadow: 0 4px 40px rgba(42,107,90,0.06);
+}
+
+.stat {
+  flex: 1;
+  text-align: center;
+  padding: 2rem 1rem;
+  border-right: 1px solid rgba(42,107,90,0.1);
+}
+
+.stat:last-child { border-right: none; }
+
+.stat-n {
+  font-family: 'Fraunces', serif;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--teal-deep);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-l {
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+
+/* ─── FOOTER ─── */
+footer {
+  border-top: 1px solid rgba(42,107,90,0.12);
+  padding: 2rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--cream);
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--teal-deep);
+}
+
+.footer-copy {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .hero { grid-template-columns: 1fr; text-align: center; padding: 2rem 1.25rem; }
+  .hero-left { max-width: 100%; }
+  .sub, .form-wrap { max-width: 100%; }
+  .pill { margin: 0 auto 1.75rem; }
+  .hero-right { display: none; }
+  .features-inner { grid-template-columns: repeat(2, 1fr); }
+  .stats { flex-direction: column; border-radius: 16px; margin: 2rem 1.25rem; }
+  .stat { border-right: none; border-bottom: 1px solid rgba(42,107,90,0.1); padding: 1.5rem; }
+  .stat:last-child { border-bottom: none; }
+  footer { flex-direction: column; gap: 1rem; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#">
+    <!-- Compass-badge hybrid logo -->
+    <svg class="logo-icon" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="38" height="38" rx="11" fill="#1A4A3E"/>
+      <circle cx="19" cy="19" r="12" stroke="#A8D4C8" stroke-width="1" fill="none" opacity="0.5"/>
+      <circle cx="19" cy="19" r="9" stroke="#A8D4C8" stroke-width="0.5" fill="none" opacity="0.3"/>
+      <!-- compass star -->
+      <path d="M19 7L20.4 15.6L28 19L20.4 22.4L19 31L17.6 22.4L10 19L17.6 15.6L19 7Z" fill="#F5EFE2"/>
+      <!-- center dot -->
+      <circle cx="19" cy="19" r="2.5" fill="#1A4A3E"/>
+      <circle cx="19" cy="19" r="1.2" fill="#A8D4C8"/>
+    </svg>
+    <span class="logo-wordmark">Go<em>Tounes</em></span>
+  </a>
+  <button class="nav-cta" onclick="document.getElementById('email-input').focus()">Join waitlist</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="pill">
+      <span class="pill-dot"></span>
+      Coming soon &middot; Tunisia
+    </div>
+
+    <h1>Discover Tunisia.<br><span class="accent">Safely. Reliably.</span></h1>
+
+    <p class="sub">Every place verified by people who've actually been there. Real prices in TND. Honest safety ratings. No tourist traps.</p>
+
+    <div class="form-wrap">
+      <div class="input-row" id="input-row">
+        <input type="email" id="email-input" placeholder="your@email.com"/>
+        <button class="btn-join" onclick="joinWaitlist()">Join waitlist</button>
+      </div>
+      <div class="form-success" id="form-success">
+        You're on the list. We'll let you know when GoTounes launches.
+      </div>
+      <p class="form-hint">No spam — launch notification only.</p>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="map-bg-circle"></div>
+    <!-- Tunisia map silhouette with pins and labels -->
+    <svg class="map-svg" width="320" height="460" viewBox="0 0 320 460" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Tunisia silhouette -->
+      <path d="M160 20 C168 20 185 24 196 34 C210 46 214 60 208 72 C222 70 232 76 230 88 C238 94 236 108 226 112 C228 126 220 136 208 134 C206 150 198 162 184 164 C188 180 182 196 168 200 C174 220 168 238 154 244 C160 266 154 288 138 296 C144 318 134 342 118 348 C124 372 110 396 96 402 C112 408 126 402 132 392 C142 398 156 390 156 380 C166 386 178 378 176 366 C188 364 196 352 190 340 C202 334 206 320 198 310 C210 302 212 286 202 278 C212 268 210 250 198 244 C206 228 200 210 186 206 C192 188 184 170 168 168 C172 150 162 132 146 132 C148 112 138 96 120 96 C124 76 112 58 96 56 C104 40 128 20 160 20Z" fill="#C9A96E" opacity="0.35"/>
+      <path d="M160 20 C168 20 185 24 196 34 C210 46 214 60 208 72 C222 70 232 76 230 88 C238 94 236 108 226 112 C228 126 220 136 208 134 C206 150 198 162 184 164 C188 180 182 196 168 200 C174 220 168 238 154 244 C160 266 154 288 138 296 C144 318 134 342 118 348 C124 372 110 396 96 402" stroke="#2A6B5A" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <!-- Pin: Bizerte -->
+      <g>
+        <path d="M188 68 C188 58 196 50 206 50 C216 50 224 58 224 68 C224 80 206 96 206 96 C206 96 188 80 188 68Z" fill="#1A4A3E"/>
+        <circle cx="206" cy="68" r="5" fill="#F5EFE2"/>
+        <text x="228" y="72" font-family="'DM Sans',sans-serif" font-size="12" fill="#1A4A3E" font-weight="500">Bizerte</text>
+      </g>
+
+      <!-- Pin: Sfax -->
+      <g>
+        <path d="M148 220 C148 210 156 202 166 202 C176 202 184 210 184 220 C184 232 166 248 166 248 C166 248 148 232 148 220Z" fill="#C17B3A"/>
+        <circle cx="166" cy="220" r="5" fill="#F5EFE2"/>
+        <text x="188" y="224" font-family="'DM Sans',sans-serif" font-size="12" fill="#1A4A3E" font-weight="500">Sfax</text>
+      </g>
+
+      <!-- Pin: Tozeur -->
+      <g>
+        <path d="M88 308 C88 298 96 290 106 290 C116 290 124 298 124 308 C124 320 106 336 106 336 C106 336 88 320 88 308Z" fill="#1A4A3E"/>
+        <circle cx="106" cy="308" r="5" fill="#F5EFE2"/>
+        <text x="128" y="312" font-family="'DM Sans',sans-serif" font-size="12" fill="#1A4A3E" font-weight="500">Tozeur</text>
+      </g>
+
+      <!-- Pin: Djerba -->
+      <g>
+        <circle cx="196" cy="310" r="16" fill="#C9A96E" opacity="0.3" stroke="#C9A96E" stroke-width="1"/>
+        <text x="196" y="314" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="10" fill="#7A4F2A" font-weight="500">Djerba</text>
+      </g>
+
+      <!-- decorative dots -->
+      <circle cx="140" cy="130" r="3" fill="#2A6B5A" opacity="0.3"/>
+      <circle cx="170" cy="170" r="2" fill="#C9A96E" opacity="0.5"/>
+      <circle cx="120" cy="260" r="2.5" fill="#2A6B5A" opacity="0.3"/>
+    </svg>
+  </div>
+</section>
+
+<!-- STATS -->
+<div style="max-width:800px;margin:0 auto;padding:0 2.5rem;">
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-n">20+</div>
+      <div class="stat-l">Verified places</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n">5</div>
+      <div class="stat-l">Regions covered</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n">0</div>
+      <div class="stat-l">Tourist traps</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n">100%</div>
+      <div class="stat-l">Ground-truth info</div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="features-inner">
+    <div class="feat">
+      <div class="feat-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M11 2C7.13 2 4 5.13 4 9C4 14.25 11 21 11 21C11 21 18 14.25 18 9C18 5.13 14.87 2 11 2Z" fill="#A8D4C8"/>
+          <circle cx="11" cy="9" r="3" fill="#1A4A3E"/>
+        </svg>
+      </div>
+      <div class="feat-title">Verified places</div>
+      <div class="feat-desc">Manually confirmed by local curators who've actually visited. No fake listings.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M11 2.5L13.1 8.8L19.8 8.8L14.4 12.7L16.5 19L11 15.1L5.5 19L7.6 12.7L2.2 8.8L8.9 8.8L11 2.5Z" fill="#C9A96E"/>
+        </svg>
+      </div>
+      <div class="feat-title">Safety scores</div>
+      <div class="feat-desc">Honest risk ratings and scam warnings. Know before you go.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="3" y="6" width="16" height="12" rx="2" stroke="#A8D4C8" stroke-width="1.5" fill="none"/>
+          <text x="11" y="14.5" text-anchor="middle" fill="#A8D4C8" font-size="6" font-weight="600" font-family="sans-serif">TND</text>
+          <path d="M7 6V5C7 3.9 7.9 3 9 3H13C14.1 3 15 3.9 15 5V6" stroke="#A8D4C8" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="feat-title">Real prices</div>
+      <div class="feat-desc">In Tunisian Dinar. What people actually paid, not tourist prices.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M11 3L3 9V20H9V14H13V20H19V9L11 3Z" stroke="#C9A96E" stroke-width="1.5" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="feat-title">Hidden gems</div>
+      <div class="feat-desc">Places locals love that don't show up on Google Maps. Real Tunisia.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <svg width="28" height="28" viewBox="0 0 38 38" fill="none">
+      <rect width="38" height="38" rx="11" fill="#1A4A3E"/>
+      <circle cx="19" cy="19" r="12" stroke="#A8D4C8" stroke-width="1" fill="none" opacity="0.5"/>
+      <path d="M19 7L20.4 15.6L28 19L20.4 22.4L19 31L17.6 22.4L10 19L17.6 15.6L19 7Z" fill="#F5EFE2"/>
+      <circle cx="19" cy="19" r="2.5" fill="#1A4A3E"/>
+      <circle cx="19" cy="19" r="1.2" fill="#A8D4C8"/>
+    </svg>
+    GoTounes
+  </div>
+  <p class="footer-copy">Built in Tunisia, for Tunisia &middot; © 2026</p>
+</footer>
+
+<script>
+function joinWaitlist() {
+  const input = document.getElementById('email-input');
+  const row = document.getElementById('input-row');
+  const success = document.getElementById('form-success');
+  const val = input.value.trim();
+  if (!val || !val.includes('@') || !val.includes('.')) {
+    input.style.borderColor = '#C17B3A';
+    input.style.boxShadow = '0 0 0 4px rgba(193,123,58,0.12)';
+    input.focus();
+    return;
+  }
+  row.style.display = 'none';
+  success.style.display = 'block';
+}
+document.getElementById('email-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') joinWaitlist();
+});
+</script>
+</body>
+</html>
