@@ -14,7 +14,17 @@ class Destination {
     this.avgPriceTnd = '',
     this.lat,
     this.lng,
-  });
+    // Add to constructor params:
+    this.safetyNote = '',
+
+    // Add field:
+    final String safetyNote;
+
+    // Add to copyWith:
+    String? safetyNote,
+    // and in return:
+    safetyNote: safetyNote ?? this.safetyNote,
+    });
 
   final String id;
   final String name;
