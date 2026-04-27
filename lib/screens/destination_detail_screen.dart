@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 import '../config/app_colors.dart';
 import '../config/app_config.dart';
 import '../models/destination.dart';
@@ -50,6 +50,24 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
     }
   }
 
+  Future<void> _openGoogleMaps(double lat, double lng) async {
+    final url = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+    );
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  void _shareDestination() {
+    Share.share(
+      'Check out ${_destination.name} in ${_destination.region} '
+      'on GoTounes! 🇹🇳\n\n${_destination.description}\n\n'
+      'Price: ${_destination.avgPriceTnd}\n'
+      'Discover more places on GoTounes.',
+    );
+  }
+
   Future<void> _loadReviews() async {
     try {
       final reviews = await _supabaseService!.getReviews(_destination.id);
@@ -61,6 +79,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
     } catch (_) {
       if (!mounted) return;
       setState(() {
+        _reviews = [];
         _isLoadingReviews = false;
       });
     }
@@ -105,7 +124,6 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
     final review = _reviews![reviewIndex];
     final wasLiked = review.isLikedByMe;
 
-    // Optimistically update UI
     setState(() {
       _reviews![reviewIndex] = review.copyWith(
         isLikedByMe: !wasLiked,
@@ -116,7 +134,6 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
     try {
       await _supabaseService!.toggleReviewLike(reviewId);
     } catch (_) {
-      // Revert on error
       if (!mounted) return;
       setState(() {
         _reviews![reviewIndex] = review;
@@ -135,7 +152,6 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
 
   void _toggleFavorite() {
     widget.onFavoriteToggle();
-    // Optimistically update the UI for immediate feedback.
     setState(() {
       _destination = _destination.copyWith(isFavorite: !_destination.isFavorite);
     });
@@ -145,6 +161,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final heroTag = widget.heroTag ?? 'destination_${_destination.id}';
+    final hasCoordinates = _destination.lat != null && _destination.lng != null;
 
     return Scaffold(
       body: CustomScrollView(
@@ -224,14 +241,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                       child: IconButton(
                         icon: const Icon(Icons.share_outlined),
                         color: AppColors.surface,
-                        onPressed: () {
-                          Share.share(
-                            'Check out ${_destination.name} in ${_destination.region} '
-                            'on GoTounes! 🇹🇳\n\n${_destination.description}\n\n'
-                            'Price: ${_destination.avgPriceTnd}\n'
-                            'Discover more places on GoTounes.',
-                          );
-                        },
+                        onPressed: _shareDestination,
                       ),
                     ),
                   ),
@@ -291,8 +301,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Chip(
-                        backgroundColor:
-                            AppColors.surface.withValues(alpha: 0.85),
+                        backgroundColor: AppColors.surface.withValues(alpha: 0.85),
                         labelStyle: theme.textTheme.bodySmall?.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -364,11 +373,68 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                             const SizedBox(height: 4),
                             Text(
                               _destination.avgPriceTnd.isEmpty ? 'N/A' : _destination.avgPriceTnd,
-                              style: theme.textTheme.labelMedium?.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: AppColors.textPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: _toggleFavorite,
+                          icon: Icon(
+                            _destination.isFavorite ? Icons.favorite : Icons.favorite_border,
+                          ),
+                          label: Text(_destination.isFavorite ? 'Saved' : 'Save'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: AppColors.surface,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _shareDestination,
+                          icon: const Icon(Icons.share_outlined),
+                          label: const Text('Share'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: BorderSide(color: AppColors.primary.withValues(alpha: 0.5)),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: hasCoordinates
+                          ? () => _openGoogleMaps(_destination.lat!, _destination.lng!)
+                          : null,
+                      icon: const Icon(Icons.map_outlined),
+                      label: const Text('Open in Google Maps'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: BorderSide(color: AppColors.primary),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 18),
@@ -448,15 +514,6 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
-        onPressed: _toggleFavorite,
-        child: Icon(
-          _destination.isFavorite ? Icons.favorite : Icons.favorite_border,
-        ),
-      ),
     );
   }
 }
-

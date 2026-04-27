@@ -12,7 +12,6 @@ import 'data/dummy_destinations.dart';
 import 'models/destination.dart';
 import 'screens/explore_screen.dart';
 import 'screens/favorites_screen.dart';
-import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/reset_password_screen.dart';
@@ -32,6 +31,9 @@ Future<void> main() async {
     await Supabase.initialize(
       url: supabaseUrl,
       anonKey: supabaseAnonKey,
+      authOptions: const FlutterAuthClientOptions(
+        authFlowType: AuthFlowType.pkce,
+      ),
     );
   }
 
@@ -113,6 +115,7 @@ class AuthGate extends StatefulWidget {
 class _AuthGateState extends State<AuthGate> {
   bool _showSplash = true;
   Session? _session;
+  bool _continueAsGuest = false;
   StreamSubscription<AuthState>? _subscription;
 
   void _dismissSplash() {
@@ -173,13 +176,28 @@ class _AuthGateState extends State<AuthGate> {
   Widget build(BuildContext context) {
     if (_showSplash) return const SplashScreen();
     if (devAuthBypass) return const MainShell();
-    if (_session == null) return const LoginScreen();
-    return const MainShell();
+    if (_session == null && !_continueAsGuest) {
+      return GuestEntryScreen(
+        onSignIn: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const LoginScreen()),
+          );
+        },
+        onContinueAsGuest: () {
+          setState(() {
+            _continueAsGuest = true;
+          });
+        },
+      );
+    }
+    return MainShell(isGuest: _session == null);
   }
 }
 
 class MainShell extends StatefulWidget {
-  const MainShell({super.key});
+  const MainShell({super.key, this.isGuest = false});
+
+  final bool isGuest;
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -219,15 +237,18 @@ class _MainShellState extends State<MainShell> {
     });
 
     try {
-      await _supabaseService.syncCurrentUserProfile();
+      if (!widget.isGuest) {
+        await _supabaseService.syncCurrentUserProfile();
+      }
       final results = await Future.wait<dynamic>([
         _supabaseService.getDestinations(),
-        _supabaseService.getUserProfile(),
+        widget.isGuest ? Future.value(const <String, String>{}) : _supabaseService.getUserProfile(),
       ]);
 
       if (!mounted) return;
+      final loadedDestinations = results[0] as List<Destination>;
       setState(() {
-        _destinations = results[0] as List<Destination>;
+        _destinations = widget.isGuest ? loadedDestinations.take(6).toList() : loadedDestinations;
         _profile = results[1] as Map<String, String>;
         _isLoading = false;
       });
@@ -241,6 +262,14 @@ class _MainShellState extends State<MainShell> {
   }
 
   Future<void> _toggleFavorite(String id) async {
+    if (widget.isGuest) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sign in to save favorites.')),
+      );
+      return;
+    }
+
     final previous = _destinations;
     setState(() {
       _destinations = _destinations.map((d) {
@@ -285,9 +314,38 @@ class _MainShellState extends State<MainShell> {
     }
   }
 
+  Future<void> _showGuestLimitDialog({
+    String title = 'Sign in to unlock more',
+    String message = 'Create an account to access all places, favorites, and your profile.',
+  }) async {
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Later'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+              );
+            },
+            child: const Text('Sign In'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final titles = ['GoTounes', 'Explore', 'Favorites', 'Profile'];
+    final titles = ['Discover', 'Favorites', 'Profile'];
 
     if (_isLoading) {
       return const Scaffold(
@@ -335,6 +393,19 @@ class _MainShellState extends State<MainShell> {
       appBar: AppBar(
         title: Text(titles[_index]),
         actions: [
+          if (widget.isGuest)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: 8),
+              child: TextButton(
+                onPressed: () {
+                  _showGuestLimitDialog(
+                    title: 'Welcome traveler',
+                    message: 'Sign in to save favorites and personalize your trip.',
+                  );
+                },
+                child: const Text('Sign In'),
+              ),
+            ),
           if (_index == 0)
             Padding(
               padding: const EdgeInsetsDirectional.only(end: 8),
@@ -348,17 +419,10 @@ class _MainShellState extends State<MainShell> {
       body: IndexedStack(
         index: _index,
         children: [
-          HomeScreen(
-            destinations: _destinations,
-            onFavoriteToggle: (id) {
-              _toggleFavorite(id);
-            },
-            onSearchTap: () {
-              setState(() => _index = 1);
-            },
-          ),
           ExploreScreen(
             destinations: _destinations,
+            isGuest: widget.isGuest,
+            onUnlockTap: widget.isGuest ? () => _showGuestLimitDialog() : null,
             onFavoriteToggle: (id) {
               _toggleFavorite(id);
             },
@@ -388,17 +452,21 @@ class _MainShellState extends State<MainShell> {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
+        onDestinationSelected: (i) {
+          if (widget.isGuest && i > 0) {
+            _showGuestLimitDialog(
+              title: 'This section is members-only',
+              message: 'Favorites and Profile are available after sign in.',
+            );
+            return;
+          }
+          setState(() => _index = i);
+        },
         destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
           NavigationDestination(
             icon: Icon(Icons.map_outlined),
             selectedIcon: Icon(Icons.map),
-            label: 'Explore',
+            label: 'Discover',
           ),
           NavigationDestination(
             icon: Icon(Icons.favorite_outline),
@@ -411,6 +479,87 @@ class _MainShellState extends State<MainShell> {
             label: 'Profile',
           ),
         ],
+      ),
+    );
+  }
+}
+
+class GuestEntryScreen extends StatelessWidget {
+  const GuestEntryScreen({
+    super.key,
+    required this.onSignIn,
+    required this.onContinueAsGuest,
+  });
+
+  final VoidCallback onSignIn;
+  final VoidCallback onContinueAsGuest;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Welcome to GoTounes',
+                style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Browse top destinations as a guest. Sign in to unlock favorites, profile, and submissions.',
+                style: theme.textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary, height: 1.4),
+              ),
+              const SizedBox(height: 24),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [AppColors.primary, AppColors.primaryDark],
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(24),
+                  child: Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Text(
+                      'Guest mode includes 6 featured places.',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: AppColors.surface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: onSignIn,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.surface,
+                  ),
+                  child: const Text('Sign In / Sign Up'),
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 50,
+                child: OutlinedButton(
+                  onPressed: onContinueAsGuest,
+                  child: const Text('Continue as Guest'),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

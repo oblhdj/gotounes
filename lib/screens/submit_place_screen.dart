@@ -149,7 +149,7 @@ class _SubmitPlaceScreenState extends State<SubmitPlaceScreen> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedRegion,
+              initialValue: _selectedRegion,
               decoration: InputDecoration(
                 labelText: 'Region *',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -163,7 +163,7 @@ class _SubmitPlaceScreenState extends State<SubmitPlaceScreen> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedCategory,
+              initialValue: _selectedCategory,
               decoration: InputDecoration(
                 labelText: 'Category *',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

@@ -32,6 +32,13 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final completionItems = <String>[
+      if (displayName.trim().isEmpty || displayName.trim() == 'Traveler') 'Display name',
+      if (bio.trim().isEmpty) 'Bio',
+      if (location.trim().isEmpty) 'Location',
+      if (avatarUrl.trim().isEmpty) 'Profile photo',
+    ];
+    final completionPercent = ((4 - completionItems.length) / 4 * 100).round();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
@@ -114,6 +121,41 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ],
+        const SizedBox(height: 20),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.cardBg,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Profile completeness: $completionPercent%',
+                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 10),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: LinearProgressIndicator(
+                  minHeight: 8,
+                  value: completionPercent / 100,
+                  color: AppColors.primary,
+                  backgroundColor: AppColors.surface,
+                ),
+              ),
+              if (completionItems.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Text(
+                  'Complete: ${completionItems.join(', ')}',
+                  style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                ),
+              ],
+            ],
+          ),
+        ),
         const SizedBox(height: 28),
         Container(
           padding: const EdgeInsets.symmetric(vertical: 16),

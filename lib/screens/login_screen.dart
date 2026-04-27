@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 import '../config/app_colors.dart';
 import '../config/app_config.dart';
@@ -14,6 +13,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _displayNameController = TextEditingController();
+  final _locationController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -24,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLogin = true;
   bool _isLoading = false;
   bool _obscurePassword = true;
+  String? _displayNameError;
   String? _emailError;
   String? _passwordError;
   int _failedAttempts = 0;
@@ -31,6 +33,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
+    _displayNameController.dispose();
+    _locationController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -41,12 +45,18 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   bool _validate() {
+    final displayName = _displayNameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
+    String? displayNameError;
     String? emailError;
     String? passwordError;
+
+    if (!_isLogin && displayName.length < 2) {
+      displayNameError = 'Display name must be at least 2 characters.';
+    }
 
     final emailRegex = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
     if (!emailRegex.hasMatch(email)) {
@@ -59,11 +69,12 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     setState(() {
+      _displayNameError = displayNameError;
       _emailError = emailError;
       _passwordError = passwordError;
     });
 
-    return emailError == null && passwordError == null;
+    return displayNameError == null && emailError == null && passwordError == null;
   }
 
   Future<void> _resetPassword() async {
@@ -77,7 +88,10 @@ class _LoginScreenState extends State<LoginScreen> {
       _emailError = null;
     });
     try {
-      await Supabase.instance.client.auth.resetPasswordForEmail(email);
+      await Supabase.instance.client.auth.resetPasswordForEmail(
+        email,
+        redirectTo: appResetPasswordUrl,
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Password reset link sent to your email!')),
@@ -108,9 +122,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final email = _emailController.text.trim();
     final password = _passwordController.text;
+    final displayName = _displayNameController.text.trim();
+    final location = _locationController.text.trim();
 
     setState(() {
       _isLoading = true;
+      _displayNameError = null;
       _emailError = null;
       _passwordError = null;
     });
@@ -129,9 +146,18 @@ class _LoginScreenState extends State<LoginScreen> {
         final response = await auth.signUp(
           email: email,
           password: password,
+          emailRedirectTo: appPrimaryUrl,
+          data: {
+            'display_name': displayName,
+            'location': location.isEmpty ? null : location,
+          },
         );
         if (response.session != null) {
           await supabaseService.syncCurrentUserProfile();
+          await supabaseService.updateProfile(
+            displayName: displayName,
+            location: location.isEmpty ? null : location,
+          );
         }
         // If email confirmations are enabled, you may not get a session yet.
         if (!mounted) return;
@@ -164,25 +190,10 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final GoogleSignIn googleSignIn = GoogleSignIn(clientId: googleWebClientId);
-      final googleUser = await googleSignIn.signIn();
-      if (googleUser == null) {
-        setState(() => _isLoading = false);
-        return; // user cancelled
-      }
-
-      final googleAuth = await googleUser.authentication;
-      final accessToken = googleAuth.accessToken;
-      final idToken = googleAuth.idToken;
-
-      if (accessToken == null || idToken == null) {
-        throw Exception('Missing Google auth tokens.');
-      }
-
-      await Supabase.instance.client.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: idToken,
-        accessToken: accessToken,
+      await Supabase.instance.client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'https://www.gotounes.me',
+        authScreenLaunchMode: LaunchMode.platformDefault,
       );
     } catch (e) {
       if (!mounted) return;
@@ -305,6 +316,50 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 if (!_isLogin) ...[
+                  TextField(
+                    controller: _displayNameController,
+                    enabled: !_isLoading,
+                    maxLength: 50,
+                    textInputAction: TextInputAction.next,
+                    decoration: InputDecoration(
+                      counterText: '',
+                      hintText: 'Display Name',
+                      filled: true,
+                      fillColor: AppColors.surface,
+                      prefixIcon: const Icon(Icons.person_outline),
+                      errorText: _displayNameError,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 16,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: _locationController,
+                    enabled: !_isLoading,
+                    maxLength: 80,
+                    textInputAction: TextInputAction.next,
+                    decoration: InputDecoration(
+                      counterText: '',
+                      hintText: 'Location (optional)',
+                      filled: true,
+                      fillColor: AppColors.surface,
+                      prefixIcon: const Icon(Icons.location_on_outlined),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 16,
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 14),
                   TextField(
                     controller: _confirmPasswordController,

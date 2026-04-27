@@ -25,6 +25,12 @@ class DestinationCard extends StatelessWidget {
     return uri != null && uri.scheme == 'https' && uri.host.isNotEmpty;
   }
 
+  String _pricePreview(String raw) {
+    final value = raw.trim();
+    if (value.isEmpty) return 'Price unavailable';
+    return value.length > 22 ? '${value.substring(0, 22)}...' : value;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -126,37 +132,26 @@ class DestinationCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      destination.region,
+                      '${destination.region}${destination.city.isNotEmpty ? ' · ${destination.city}' : ''}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    if (destination.city.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        destination.city,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.shield, size: 14, color: AppColors.primary),
-                        const SizedBox(width: 2),
+                        const Icon(Icons.verified_user_outlined, size: 14, color: AppColors.primary),
+                        const SizedBox(width: 4),
                         Text(
-                          destination.safetyScore.toString(),
+                          'Safety ${destination.safetyScore}/5',
                           style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600, color: AppColors.primary),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            destination.avgPriceTnd,
+                            _pricePreview(destination.avgPriceTnd),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.labelSmall?.copyWith(
@@ -247,6 +242,42 @@ class DestinationCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          destination.category,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      if (destination.isVerified)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            'Verified',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: Colors.green.shade700,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
@@ -270,38 +301,29 @@ class DestinationCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    destination.region,
+                    '${destination.region}${destination.city.isNotEmpty ? ' · ${destination.city}' : ''}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
-                  if (destination.city.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      destination.city,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Row(
-                        children: List.generate(5, (index) {
-                          return Icon(
-                            index < destination.safetyScore ? Icons.shield : Icons.shield_outlined,
-                            size: 16,
-                            color: AppColors.primary,
-                          );
-                        }),
+                      const Icon(Icons.verified_user_outlined, size: 16, color: AppColors.primary),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Safety ${destination.safetyScore}/5',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 10),
                       const Icon(Icons.payments_outlined, size: 16, color: AppColors.textSecondary),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          destination.avgPriceTnd,
+                          _pricePreview(destination.avgPriceTnd),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.labelMedium?.copyWith(

@@ -191,7 +191,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
             const SizedBox(height: 20),
             DropdownButtonFormField<String>(
-              value: _selectedGovernorate,
+              initialValue: _selectedGovernorate,
               items: getAllGovernorates().map((gov) {
                 return DropdownMenuItem(value: gov, child: Text(gov));
               }).toList(),
@@ -215,7 +215,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             if (_selectedGovernorate != null) ...[
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(
-                value: _selectedDelegation,
+                initialValue: _selectedDelegation,
                 items: tunisiaRegions[_selectedGovernorate]!.map((del) {
                   return DropdownMenuItem(value: del, child: Text(del));
                 }).toList(),

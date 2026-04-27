@@ -26,7 +26,7 @@ class SupabaseService {
     final favoriteIds = await _getFavoriteIds();
     final rows = await _client
         .from('destinations')
-        .select('id, name, region, category, description, image_url, is_verified, safety_score, avg_price_tnd, lat, lng, place_images(url, display_order)')
+        .select('id, name, region, category, description, safety_note, image_url, is_verified, safety_score, avg_price_tnd, lat, lng, place_images(url, display_order)')
         .order('name');
 
     return rows.map<Destination>((row) {
@@ -150,13 +150,12 @@ class SupabaseService {
     final user = currentUser;
     if (user == null) throw const AuthException('Not authenticated.');
 
-    final combinedDescription = description + (safetyNote.isNotEmpty ? '\n\nSafety Note: $safetyNote' : '');
-
     final response = await _client.from('destinations').insert({
       'name': name,
       'region': region,
       'category': category,
-      'description': combinedDescription,
+      'description': description,
+      'safety_note': safetyNote,
       'avg_price_tnd': avgPriceTnd,
       'status': 'pending',
       'submitted_by': user.id,
@@ -213,14 +212,82 @@ class SupabaseService {
     final user = currentUser;
     if (user == null) throw const AuthException('You must be signed in to submit a review.');
 
-    await _client.from('reviews').insert({
+    await syncCurrentUserProfile();
+
+    final basePayload = <String, dynamic>{
       'destination_id': destinationId,
       'user_id': user.id,
       'rating': rating,
       'body': body,
-      'tags': tags,
-      'is_recent_visit': isRecentVisit,
-    });
+    };
+
+    try {
+      await _client.from('reviews').insert({
+        ...basePayload,
+        'tags': tags,
+        'is_recent_visit': isRecentVisit,
+      });
+    } on PostgrestException catch (e) {
+      final message = e.message.toLowerCase();
+      final hasSchemaMismatch = message.contains('schema cache') ||
+          message.contains("'tags' column") ||
+          message.contains('column tags') ||
+          message.contains("'is_recent_visit' column") ||
+          message.contains('column is_recent_visit');
+
+      if (hasSchemaMismatch) {
+        final retryPayload = <String, dynamic>{...basePayload};
+
+        // Keep only columns that are likely available on older schemas.
+        if (!message.contains("'tags' column") && !message.contains('column tags')) {
+          retryPayload['tags'] = tags;
+        }
+        if (!message.contains("'is_recent_visit' column") && !message.contains('column is_recent_visit')) {
+          retryPayload['is_recent_visit'] = isRecentVisit;
+        }
+
+        try {
+          await _client.from('reviews').insert(retryPayload);
+          return;
+        } on PostgrestException catch (fallbackError) {
+          final fallbackMessage = fallbackError.message.toLowerCase();
+          final stillSchemaMismatch = fallbackMessage.contains('schema cache') ||
+              fallbackMessage.contains("'tags' column") ||
+              fallbackMessage.contains('column tags') ||
+              fallbackMessage.contains("'is_recent_visit' column") ||
+              fallbackMessage.contains('column is_recent_visit');
+
+          if (stillSchemaMismatch) {
+            await _client.from('reviews').insert(basePayload);
+            return;
+          }
+
+          if (fallbackMessage.contains('duplicate') ||
+              fallbackMessage.contains('unique') ||
+              fallbackMessage.contains('already')) {
+            throw Exception('You already submitted a review for this place.');
+          }
+          if (fallbackMessage.contains('row-level security') ||
+              fallbackMessage.contains('permission') ||
+              fallbackMessage.contains('policy')) {
+            throw Exception('You do not have permission to submit reviews right now. Please sign out and sign in again.');
+          }
+          throw Exception('Could not submit review: ${fallbackError.message}');
+        }
+      }
+
+      if (message.contains('duplicate') ||
+          message.contains('unique') ||
+          message.contains('already')) {
+        throw Exception('You already submitted a review for this place.');
+      }
+      if (message.contains('row-level security') ||
+          message.contains('permission') ||
+          message.contains('policy')) {
+        throw Exception('You do not have permission to submit reviews right now. Please sign out and sign in again.');
+      }
+      throw Exception('Could not submit review: ${e.message}');
+    }
   }
 
   Future<void> toggleReviewLike(String reviewId) async {
@@ -274,10 +341,16 @@ class SupabaseService {
     if (user == null) return;
 
     final email = user.email ?? '';
+    final metadata = user.userMetadata ?? const <String, dynamic>{};
+    final metadataDisplayName = metadata['display_name'] as String?;
+    final metadataLocation = metadata['location'] as String?;
     await _client.from('profiles').upsert({
       'id': user.id,
       'email': email,
-      'display_name': _fallbackDisplayName(email),
+      'display_name': (metadataDisplayName != null && metadataDisplayName.trim().isNotEmpty)
+          ? metadataDisplayName.trim()
+          : _fallbackDisplayName(email),
+      'location': metadataLocation,
     });
   }
 
